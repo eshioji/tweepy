@@ -154,7 +154,10 @@ def bind_api(**config):
                     raise TweepError('Failed to send request: %s' % e)
 
                 # Exit request loop if non-retry error code
-                if self.retry_errors:
+                # Retry on rate limit exceeded, but do only so after waiting for 15 minutes
+                if resp.status == 429:
+                    time.sleep(int(15 * 60 * 1.2))
+                elif self.retry_errors:
                     if resp.status not in self.retry_errors: break
                 else:
                     if resp.status == 200: break
